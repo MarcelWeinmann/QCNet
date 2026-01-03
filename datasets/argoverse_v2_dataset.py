@@ -166,20 +166,8 @@ class ArgoverseV2Dataset(Dataset):
         return self._processed_file_names
 
     def download(self) -> None:
-        if not os.path.isfile(os.path.join(self.root, f'{self.split}.tar')):
-            print(f'Downloading {self._url}', file=sys.stderr)
-            request.urlretrieve(self._url, os.path.join(self.root, f'{self.split}.tar'))
-        if os.path.isdir(os.path.join(self.root, self.split)):
-            shutil.rmtree(os.path.join(self.root, self.split))
-        if os.path.isdir(self.raw_dir):
-            shutil.rmtree(self.raw_dir)
-        os.makedirs(self.raw_dir)
-        extract_tar(path=os.path.join(self.root, f'{self.split}.tar'), folder=self.raw_dir, mode='r')
-        self._raw_file_names = [name for name in os.listdir(os.path.join(self.raw_dir, self.split)) if
-                                os.path.isdir(os.path.join(self.raw_dir, self.split, name))]
-        for raw_file_name in self.raw_file_names:
-            shutil.move(os.path.join(self.raw_dir, self.split, raw_file_name), self.raw_dir)
-        os.rmdir(os.path.join(self.raw_dir, self.split))
+        # dont do anything as we use a costum dataset
+        return
 
     def process(self) -> None:
         for raw_file_name in tqdm(self.raw_file_names):
@@ -511,12 +499,8 @@ class ArgoverseV2Dataset(Dataset):
             return HeteroData(pickle.load(handle))
 
     def _download(self) -> None:
-        # if complete raw/processed files exist, skip downloading
-        if ((os.path.isdir(self.raw_dir) and len(self.raw_file_names) == len(self)) or
-                (os.path.isdir(self.processed_dir) and len(self.processed_file_names) == len(self))):
-            return
-        self._processed_file_names = []
-        self.download()
+        # dont do anything as we use a costum dataset
+        return
 
     def _process(self) -> None:
         # if complete processed files exist, skip processing
@@ -532,3 +516,4 @@ class ArgoverseV2Dataset(Dataset):
         self._processed_file_names = [f'{raw_file_name}.pkl' for raw_file_name in self.raw_file_names]
         self.process()
         print('Done!', file=sys.stderr)
+        self._num_samples = len(self.processed_file_names)
