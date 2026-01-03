@@ -17,6 +17,7 @@ import pytorch_lightning as pl
 from torch_geometric.loader import DataLoader
 
 from datasets import ArgoverseV2Dataset
+from transforms import TargetBuilder
 from predictors import QCNet
 
 if __name__ == '__main__':
@@ -39,7 +40,9 @@ if __name__ == '__main__':
     }[args.model].load_from_checkpoint(checkpoint_path=args.ckpt_path)
     test_dataset = {
         'argoverse_v2': ArgoverseV2Dataset,
-    }[model.dataset](root=args.root, split='test')
+    }[model.dataset](root=args.root, split='test',
+                     transform=TargetBuilder(model.num_historical_steps, model.num_future_steps),
+                     num_historical_steps=model.num_historical_steps, num_future_steps=model.num_future_steps)
     dataloader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers,
                             pin_memory=args.pin_memory, persistent_workers=args.persistent_workers)
     trainer = pl.Trainer(accelerator=args.accelerator, devices=args.devices, strategy='ddp')

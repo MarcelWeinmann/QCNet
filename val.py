@@ -41,7 +41,8 @@ if __name__ == '__main__':
     val_dataset = {
         'argoverse_v2': ArgoverseV2Dataset,
     }[model.dataset](root=args.root, split='val',
-                     transform=TargetBuilder(model.num_historical_steps, model.num_future_steps))
+                     transform=TargetBuilder(model.num_historical_steps, model.num_future_steps),
+                     num_historical_steps=model.num_historical_steps, num_future_steps=model.num_future_steps)
     dataloader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers,
                             pin_memory=args.pin_memory, persistent_workers=args.persistent_workers)
     trainer = pl.Trainer(accelerator=args.accelerator, devices=args.devices, strategy='ddp')
