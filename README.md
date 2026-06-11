@@ -57,7 +57,7 @@ Alternatively, you can configure the environment in your favorite way. Installin
 
 The training process consumes ~160G GPU memory. For example, you can train the model on 8 NVIDIA GeForce RTX 3090:
 ```
-python train_qcnet.py --root /path/to/dataset_root/ --train_batch_size 4 --val_batch_size 4 --test_batch_size 4 --devices 8 --dataset argoverse_v2 --num_historical_steps 50 --num_future_steps 60 --num_recurrent_steps 3 --pl2pl_radius 150 --time_span 10 --pl2a_radius 50 --a2a_radius 50 --num_t2m_steps 30 --pl2m_radius 150 --a2m_radius 150
+python3 train_qcnet.py --root /dev_ws/src/tam_deep_prediction/data/raceverse_autonoma_v3/abudhabi_north --train_batch_size 4 --val_batch_size 4 --test_batch_size 4 --devices 1 --dataset argoverse_v2 --num_historical_steps 10 --num_future_steps 40 --num_recurrent_steps 3 --pl2pl_radius 250 --time_span 10 --pl2a_radius 250 --a2a_radius 250 --num_t2m_steps 10 --pl2m_radius 250 --a2m_radius 250
 ```
 
 **Note 1**: when running the training script for the first time, it will take several hours to preprocess the data.

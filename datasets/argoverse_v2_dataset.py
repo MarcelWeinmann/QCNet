@@ -177,7 +177,7 @@ class ArgoverseV2Dataset(Dataset):
             map_data = read_json_file(map_path)
             centerlines = {lane_segment['id']: Polyline.from_json_data(lane_segment['centerline'])
                            for lane_segment in map_data['lane_segments'].values()}
-            map_api = ArgoverseStaticMap.from_json(map_path)
+            map_api = ArgoverseStaticMap.from_json(map_path, overwrite_centerline=False)
             data = dict()
             data['scenario_id'] = self.get_scenario_id(df)
             data['city'] = self.get_city(df)
