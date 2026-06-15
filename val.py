@@ -33,8 +33,8 @@ if __name__ == '__main__':
     parser.add_argument('--accelerator', type=str, default='auto')
     parser.add_argument('--devices', type=int, default=1)
     parser.add_argument('--ckpt_path', type=str, required=True)
-    parser.add_argument('--use_raceline', type=bool, default=True)
-    parser.add_argument('--use_raceline_velocity', type=bool, default=False)
+    parser.add_argument('--use_raceline', action='store_true')
+    parser.add_argument('--use_raceline_velocity', action='store_true')
     args = parser.parse_args()
 
     model = {
