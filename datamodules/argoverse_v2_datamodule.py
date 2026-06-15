@@ -32,6 +32,8 @@ class ArgoverseV2DataModule(pl.LightningDataModule):
                  shuffle: bool = True,
                  num_workers: int = 0,
                  pin_memory: bool = True,
+                 use_raceline: bool = True,
+                 use_raceline_velocity: bool = False,
                  persistent_workers: bool = True,
                  train_raw_dir: Optional[str] = None,
                  val_raw_dir: Optional[str] = None,
@@ -47,6 +49,8 @@ class ArgoverseV2DataModule(pl.LightningDataModule):
         self.test_batch_size = test_batch_size
         self.num_historical_steps = num_historical_steps
         self.num_future_steps = num_future_steps
+        self.use_raceline = use_raceline
+        self.use_raceline_velocity = use_raceline_velocity
         self.shuffle = shuffle
         self.num_workers = num_workers
         self.pin_memory = pin_memory
@@ -63,19 +67,25 @@ class ArgoverseV2DataModule(pl.LightningDataModule):
 
     def prepare_data(self) -> None:
         ArgoverseV2Dataset(self.root, 'train', self.train_raw_dir, self.train_processed_dir, self.train_transform,
-                           num_historical_steps=self.num_historical_steps, num_future_steps=self.num_future_steps)
+                           num_historical_steps=self.num_historical_steps, num_future_steps=self.num_future_steps,
+                           use_raceline=self.use_raceline, use_raceline_velocity=self.use_raceline_velocity)
         ArgoverseV2Dataset(self.root, 'val', self.val_raw_dir, self.val_processed_dir, self.val_transform,
-                           num_historical_steps=self.num_historical_steps, num_future_steps=self.num_future_steps)
+                           num_historical_steps=self.num_historical_steps, num_future_steps=self.num_future_steps,
+                           use_raceline=self.use_raceline, use_raceline_velocity=self.use_raceline_velocity)
         ArgoverseV2Dataset(self.root, 'test', self.test_raw_dir, self.test_processed_dir, self.test_transform,
-                           num_historical_steps=self.num_historical_steps, num_future_steps=self.num_future_steps)
+                           num_historical_steps=self.num_historical_steps, num_future_steps=self.num_future_steps,
+                           use_raceline=self.use_raceline, use_raceline_velocity=self.use_raceline_velocity)
 
     def setup(self, stage: Optional[str] = None) -> None:
         self.train_dataset = ArgoverseV2Dataset(self.root, 'train', self.train_raw_dir, self.train_processed_dir,
-                                                self.train_transform, num_historical_steps=self.num_historical_steps, num_future_steps=self.num_future_steps)
+                                                self.train_transform, num_historical_steps=self.num_historical_steps, num_future_steps=self.num_future_steps,
+                                                use_raceline=self.use_raceline, use_raceline_velocity=self.use_raceline_velocity)
         self.val_dataset = ArgoverseV2Dataset(self.root, 'val', self.val_raw_dir, self.val_processed_dir,
-                                              self.val_transform, num_historical_steps=self.num_historical_steps, num_future_steps=self.num_future_steps)
+                                              self.val_transform, num_historical_steps=self.num_historical_steps, num_future_steps=self.num_future_steps,
+                                              use_raceline=self.use_raceline, use_raceline_velocity=self.use_raceline_velocity)
         self.test_dataset = ArgoverseV2Dataset(self.root, 'test', self.test_raw_dir, self.test_processed_dir,
-                                               self.test_transform, num_historical_steps=self.num_historical_steps, num_future_steps=self.num_future_steps)
+                                               self.test_transform, num_historical_steps=self.num_historical_steps, num_future_steps=self.num_future_steps,
+                                               use_raceline=self.use_raceline, use_raceline_velocity=self.use_raceline_velocity)
 
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.train_batch_size, shuffle=self.shuffle,

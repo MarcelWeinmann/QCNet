@@ -42,7 +42,8 @@ if __name__ == '__main__':
         'argoverse_v2': ArgoverseV2Dataset,
     }[model.dataset](root=args.root, split='test',
                      transform=TargetBuilder(model.num_historical_steps, model.num_future_steps),
-                     num_historical_steps=model.num_historical_steps, num_future_steps=model.num_future_steps)
+                     num_historical_steps=model.num_historical_steps, num_future_steps=model.num_future_steps,
+                     use_raceline=args.use_raceline, use_raceline_velocity=args.use_raceline_velocity)
     dataloader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers,
                             pin_memory=args.pin_memory, persistent_workers=args.persistent_workers)
     trainer = pl.Trainer(accelerator=args.accelerator, devices=args.devices, strategy='ddp')

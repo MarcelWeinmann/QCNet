@@ -80,7 +80,9 @@ class ArgoverseV2Dataset(Dataset):
                  num_historical_steps: int = 50,
                  num_future_steps: int = 60,
                  predict_unseen_agents: bool = False,
-                 vector_repr: bool = True) -> None:
+                 vector_repr: bool = True,
+                 use_raceline = True,
+                 use_raceline_velocity = False) -> None:
         root = os.path.expanduser(os.path.normpath(root))
         if not os.path.isdir(root):
             os.makedirs(root)
@@ -130,6 +132,9 @@ class ArgoverseV2Dataset(Dataset):
         self.num_steps = num_historical_steps + num_future_steps
         self.predict_unseen_agents = predict_unseen_agents
         self.vector_repr = vector_repr
+        self.use_raceline = use_raceline
+        self.use_raceline_velocity = use_raceline_velocity
+
         self._url = f'https://s3.amazonaws.com/argoverse/datasets/av2/tars/motion-forecasting/{split}.tar'
         self._num_samples = {
             'train': 199908,
@@ -284,7 +289,20 @@ class ArgoverseV2Dataset(Dataset):
 
         for lane_segment in map_api.get_scenario_lane_segments():
             lane_segment_idx = polygon_ids.index(lane_segment.id)
-            centerline = torch.from_numpy(centerlines[lane_segment.id].xyz).float()
+            left_boundary = torch.from_numpy(lane_segment.left_lane_boundary.xyz).float()
+            right_boundary = torch.from_numpy(lane_segment.right_lane_boundary.xyz).float()
+            centerline = torch.from_numpy(
+                compute_midpoint_line(left_ln_boundary=left_boundary.numpy(),
+                                      right_ln_boundary=right_boundary.numpy(),
+                                      num_interp_pts=left_boundary.numpy().shape[0])[0]).float()
+            if self.use_raceline:
+                centerline = torch.from_numpy(centerlines[lane_segment.id].xyz).float()
+            if self.use_raceline_velocity and self.use_raceline:
+                centerline = torch.from_numpy(centerlines[lane_segment.id].xyzv[:, [0, 1, 3]]).float()
+                centerline[:, 2] = torch.clamp(centerline[:, 2], min=0.0) / 70.0
+
+            print(f"self.use_raceline: {self.use_raceline}, self.use_raceline_velocity: {self.use_raceline_velocity}")
+            print(centerline)
             polygon_position[lane_segment_idx] = centerline[0, :self.dim]
             polygon_orientation[lane_segment_idx] = torch.atan2(centerline[1, 1] - centerline[0, 1],
                                                                 centerline[1, 0] - centerline[0, 0])
@@ -293,8 +311,6 @@ class ArgoverseV2Dataset(Dataset):
             polygon_is_intersection[lane_segment_idx] = self._polygon_is_intersections.index(
                 lane_segment.is_intersection)
 
-            left_boundary = torch.from_numpy(lane_segment.left_lane_boundary.xyz).float()
-            right_boundary = torch.from_numpy(lane_segment.right_lane_boundary.xyz).float()
             point_position[lane_segment_idx] = torch.cat([left_boundary[:-1, :self.dim],
                                                           right_boundary[:-1, :self.dim],
                                                           centerline[:-1, :self.dim]], dim=0)
