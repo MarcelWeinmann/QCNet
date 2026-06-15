@@ -300,9 +300,6 @@ class ArgoverseV2Dataset(Dataset):
             if self.use_raceline_velocity and self.use_raceline:
                 centerline = torch.from_numpy(centerlines[lane_segment.id].xyzv[:, [0, 1, 3]]).float()
                 centerline[:, 2] = torch.clamp(centerline[:, 2], min=0.0) / 70.0
-
-            print(f"self.use_raceline: {self.use_raceline}, self.use_raceline_velocity: {self.use_raceline_velocity}")
-            print(centerline)
             polygon_position[lane_segment_idx] = centerline[0, :self.dim]
             polygon_orientation[lane_segment_idx] = torch.atan2(centerline[1, 1] - centerline[0, 1],
                                                                 centerline[1, 0] - centerline[0, 0])
